@@ -67,6 +67,6 @@ use {
   }
 }
 
-use {'romgrk/barbar.nvim', requires = 'nvim-web-devicons'}
+-- use {'romgrk/barbar.nvim', requires = 'nvim-web-devicons'}
 
 end)

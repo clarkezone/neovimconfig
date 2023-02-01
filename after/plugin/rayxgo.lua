@@ -16,3 +16,4 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 vim.keymap.set("n", "<leader>tf", vim.cmd.GoTestFunc)
+vim.keymap.set("n", "<leader>bt", vim.cmd.GoBreakToggle)
