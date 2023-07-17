@@ -2,9 +2,6 @@
 -- Learn to configure LSP servers, see :help lsp-zero-api-showcase
 local lsp = require('lsp-zero')
 lsp.preset('recommended')
-lsp.ensure_installed( {
-'rust_analyzer'
-})
 
 local cmp = require("cmp")
 local cmp_select = {behavior = cmp.Select}
