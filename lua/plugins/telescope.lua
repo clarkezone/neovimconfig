@@ -30,6 +30,10 @@ vim.keymap.set('n', '<leader>sk', require('telescope.builtin').keymaps, { desc =
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>ps', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sm', require('telescope.builtin').marks, { desc = '[S]earch [M]arks' })
+vim.keymap.set('n', '<leader>sl', require('telescope.builtin').loclist, { desc = '[S]earch [L]ocation qist' })
+vim.keymap.set('n', '<leader>sj', require('telescope.builtin').jumplist, { desc = '[S]earch [J]umps' })
+vim.keymap.set('n', '<leader>sq', require('telescope.builtin').quickfix, { desc = '[S]earch [Q]uickfix' })
 
 vim.keymap.set('n', '<leader>pc', function()
   require('telescope.builtin').find_files( { cwd = vim.fn.expand('%:p:h') })
