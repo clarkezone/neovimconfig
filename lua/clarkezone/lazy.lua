@@ -55,33 +55,7 @@ require("lazy").setup({
 		end,
 	},
 
-	{
-		"ray-x/go.nvim",
-		dependencies = { "ray-x/guihua.lua" },
-		config = function()
-			local capabilities =
-				require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
-			require("go").setup({
-				lsp_cfg = {
-					capabilities = capabilities,
-				},
-			})
-			local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				pattern = "*.go",
-				callback = function()
-					require("go.format").goimport()
-				end,
-				group = format_sync_grp,
-			})
-			vim.keymap.set("n", "<leader>tf", vim.cmd.GoTestFunc)
-			vim.keymap.set("n", "<leader>bt", vim.cmd.GoBreakToggle)
-		end,
-		ft = { "go", "gomod" },
-		event = { "CmdlineEnter" },
-	},
-
-	{
+{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
 		config = function()
@@ -166,6 +140,12 @@ require("lazy").setup({
 
 			lsp.nvim_workspace()
 			lsp.setup()
+
+			-- Mojo LSP (ships with Mojo SDK, not available in Mason)
+			local lspconfig = require("lspconfig")
+			if vim.fn.executable("mojo-lsp-server") == 1 then
+				lspconfig.mojo.setup({})
+			end
 		end,
 	},
 
