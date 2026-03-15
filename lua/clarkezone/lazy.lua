@@ -90,7 +90,6 @@ require("lazy").setup({
 				sync_install = false,
 				auto_install = true,
 			})
-			vim.treesitter.start()
 		end,
 	},
 
