@@ -15,7 +15,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	{
 		"nvim-telescope/telescope.nvim",
-		tag = "0.1.1",
+		tag = "0.2.1",
 		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
 			local builtin = require("telescope.builtin")
@@ -55,29 +55,39 @@ require("lazy").setup({
 		end,
 	},
 
-{
+	{
 		"nvim-treesitter/nvim-treesitter",
+		branch = "main",
 		build = ":TSUpdate",
 		config = function()
 			require("nvim-treesitter").setup({
-				ensure_installed = "all",
-				sync_install = false,
+				ensure_installed = { "lua", "vim", "vimdoc", "query", "python", "javascript", "typescript", "rust", "go", "c", "cpp", "bash", "html", "css", "json", "yaml", "toml", "markdown" },
 				auto_install = true,
+			})
+			-- Highlighting is now built into Neovim via vim.treesitter.start()
+			-- Enable it for all filetypes that have a treesitter parser
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function(args)
+					pcall(vim.treesitter.start, args.buf)
+				end,
 			})
 		end,
 	},
 
 	{
 		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
-			local mark = require("harpoon.mark")
-			local ui = require("harpoon.ui")
-			vim.keymap.set("n", "<leader>a", mark.add_file)
-			vim.keymap.set("n", "<C-e>", ui.toggle_quick_menu)
-			vim.keymap.set("n", "<C-h>", function() ui.nav_file(1) end)
-			vim.keymap.set("n", "<C-t>", function() ui.nav_file(2) end)
-			vim.keymap.set("n", "<C-n>", function() ui.nav_file(3) end)
-			vim.keymap.set("n", "<C-s>", function() ui.nav_file(4) end)
+			local harpoon = require("harpoon")
+			harpoon:setup()
+
+			vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
+			vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+			vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
+			vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
+			vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
+			vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
 		end,
 	},
 
@@ -101,50 +111,59 @@ require("lazy").setup({
 	{ "theHamsta/nvim-dap-virtual-text" },
 	{
 		"rcarriga/nvim-dap-ui",
-		dependencies = { "mfussenegger/nvim-dap" },
+		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
 	},
 
+	-- LSP: mason for server installation, native Neovim 0.11 LSP for config
 	{
-		"VonHeikemen/lsp-zero.nvim",
-		branch = "v1.x",
-		dependencies = {
-			-- LSP Support
-			{ "neovim/nvim-lspconfig" },
-			{ "williamboman/mason.nvim" },
-			{ "williamboman/mason-lspconfig.nvim" },
-			-- Autocompletion
-			{ "hrsh7th/nvim-cmp" },
-			{ "hrsh7th/cmp-nvim-lsp" },
-			{ "hrsh7th/cmp-buffer" },
-			{ "hrsh7th/cmp-path" },
-			{ "saadparwaiz1/cmp_luasnip" },
-			{ "hrsh7th/cmp-nvim-lua" },
-			-- Snippets
-			{ "L3MON4D3/LuaSnip" },
-			{ "rafamadriz/friendly-snippets" },
-		},
+		"mason-org/mason.nvim",
 		config = function()
-			local lsp = require("lsp-zero")
-			lsp.preset("recommended")
-
-			local cmp = require("cmp")
-			local cmp_select = { behavior = cmp.SelectBehavior.Select }
-			local cmp_mappings = lsp.defaults.cmp_mappings({
-				["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
-				["<C-Space>"] = cmp.mapping.complete(),
+			require("mason").setup()
+		end,
+	},
+	{
+		"mason-org/mason-lspconfig.nvim",
+		dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+		config = function()
+			require("mason-lspconfig").setup({
+				automatic_enable = true,
 			})
+		end,
+	},
+	{ "neovim/nvim-lspconfig" },
 
-			lsp.setup_nvim_cmp({
-				mapping = cmp_mappings,
-			})
+	-- Completion: blink.cmp
+	{
+		"saghen/blink.cmp",
+		version = "1.*",
+		dependencies = { "rafamadriz/friendly-snippets" },
+		opts = {
+			keymap = {
+				preset = "default",
+				["<C-p>"] = { "select_prev", "fallback" },
+				["<C-Space>"] = { "show" },
+			},
+			completion = {
+				documentation = { auto_show = true },
+			},
+			sources = {
+				default = { "lsp", "path", "snippets", "buffer" },
+			},
+		},
+	},
 
-			lsp.nvim_workspace()
-			lsp.setup()
-
-			-- Mojo LSP (ships with Mojo SDK, not available in Mason)
-			local lspconfig = require("lspconfig")
+	-- Mojo LSP (ships with Mojo SDK, not available in Mason)
+	{
+		"neovim/nvim-lspconfig",
+		name = "mojo-lsp-setup",
+		config = function()
 			if vim.fn.executable("mojo-lsp-server") == 1 then
-				lspconfig.mojo.setup({})
+				vim.lsp.config("mojo", {
+					cmd = { "mojo-lsp-server" },
+					filetypes = { "mojo" },
+					root_markers = { "mojoproject.toml", ".git" },
+				})
+				vim.lsp.enable("mojo")
 			end
 		end,
 	},
