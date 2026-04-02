@@ -144,7 +144,9 @@ require("lazy").setup({
 			-- Mojo LSP (ships with Mojo SDK, not available in Mason)
 			local lspconfig = require("lspconfig")
 			if vim.fn.executable("mojo-lsp-server") == 1 then
-				lspconfig.mojo.setup({})
+				lspconfig.mojo.setup({
+					capabilities = require("cmp_nvim_lsp").default_capabilities(),
+				})
 			end
 		end,
 	},
