@@ -145,9 +145,18 @@ require("lazy").setup({
 			},
 			completion = {
 				documentation = { auto_show = true },
+				trigger = {
+					show_on_trigger_character = true,
+				},
 			},
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer" },
+				providers = {
+					lsp = {
+						-- Trigger completion on '.' for LSP servers that don't advertise it
+						override_trigger_characters = { "." },
+					},
+				},
 			},
 		},
 	},
